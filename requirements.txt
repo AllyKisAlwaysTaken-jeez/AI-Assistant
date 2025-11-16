@@ -4,5 +4,6 @@ requests
 beautifulsoup4
 pydantic
 nltk
-scikit-learngunicorn 
+scikit-learn
+gunicorn 
 uvicorn 
