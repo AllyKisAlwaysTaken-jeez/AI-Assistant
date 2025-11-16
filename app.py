@@ -1,19 +1,22 @@
+import os
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from ai_generator import generate_response
 from competitor_scrapper import analyze_competitors
 from seo_analyser import seo_recommendations
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-import uvicorn
 
-#  Create the FastAPI app first
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+
+#Fast API
 app = FastAPI()
-
 #  static files and set up templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 #  homepage route
 @app.get("/", response_class=HTMLResponse)
@@ -25,7 +28,7 @@ class ClientRequest(BaseModel):
     industry: str
     style: str
     goals: str
-    competitors: list
+    competitors: list[str]
 
 # AI endpoint
 @app.post("/generate-portfolio-advice")
@@ -45,6 +48,7 @@ async def generate_portfolio_advice(data: ClientRequest):
         ]
     }
 
-#  Run locally with: python app.py
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=True)
